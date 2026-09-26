@@ -1,0 +1,14 @@
+{{- /* Solo projects and open source contribution sections, shared by home and resume. */ -}}
+<section id="projects" class="proj-section" aria-labelledby="proj-h">
+  <h2 id="proj-h">Solo Projects</h2>
+  {{- range site.Data.projects }}
+  {{ partial "card.html" . }}
+  {{- end }}
+</section>
+
+<section id="opensource" class="proj-section" aria-labelledby="os-h">
+  <h2 id="os-h">Open Source Contributions</h2>
+  {{- range site.Data.contributions }}
+  {{ partial "card.html" . }}
+  {{- end }}
+</section>

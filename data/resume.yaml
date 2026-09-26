@@ -1,0 +1,90 @@
+# CV-only content for /resume. Projects and contributions come from their own files.
+updated: June 16, 2026
+phone: "+1-703-362-3220"
+role_line: Senior Infrastructure / Platform Engineer · DevOps · Cloud · CI/CD
+
+summary: >-
+  Senior Infrastructure / Platform Engineer with 15+ years designing, automating, and operating production-grade systems across cloud and bare-metal. Deep expertise in the HashiCorp stack (Nomad, Consul, Vault/OpenBao), infrastructure-as-code with Terraform and Terragrunt, and Go-based service writing including things such as multi-cloud storage/routing, certificate automation, admission control systems, database tooling, and Temporal-driven workflows. Proven track record delivering secure, observable platforms: SOC 2 compliance, organization-wide CI/CD, multi-region architectures, and full-stack observability with Prometheus, Grafana, Loki, Tempo, and OpenTelemetry. Builds and operates a production-grade homelab entirely as code - a Nomad/Consul/Vault cluster, HA PostgreSQL, and custom Go microservices across bare-metal and cloud.
+
+skills:
+  - { label: "Cloud & Platforms", items: [AWS, GCP, Oracle Cloud, Proxmox, Cloudflare] }
+  - { label: "IaC & Config Mgmt", items: [Terraform, Terragrunt, Chef, Puppet, Ansible, CDKTF] }
+  - { label: "CI/CD & Tooling", items: [Jenkins, GitLab CI, GitHub Actions, Groovy, Docker, SonarQube, golangci-lint, govulncheck, goreleaser] }
+  - { label: Orchestration, items: [Kubernetes, Nomad, Consul, Temporal] }
+  - { label: Observability, items: [Prometheus, Grafana, Loki, Tempo, OpenTelemetry, Alloy, Alertmanager, ELK Stack] }
+  - { label: "Networking & Runtime", items: [WireGuard, Traefik, HAProxy, keepalived, OpenVPN, gRPC, REST] }
+  - { label: Datastores, items: [PostgreSQL, MySQL, Redis, MongoDB, SQLite, Patroni, sqlc, goose] }
+  - { label: Languages, items: [Go, Python, Ruby, Bash, C, SQL, HCL, YAML] }
+  - { label: "Security & Secrets", items: ["Vault (PKI, Transit, SSH CA)", oauth2-proxy, authentik, mTLS, "ACME / Let's Encrypt", SigV4, cosign, SOC 2] }
+  - { label: Distributed Systems, items: [Saga / compensation, circuit breakers, rate limiting, multi-cloud replication, HA / failover] }
+
+experience:
+  - company: Commerce
+    title: Senior Infrastructure Engineer
+    dates: Nov 2025 – Present
+    location: Remote
+    items:
+      - Writing Go-based services and infrastructure tooling for automated certificate management, database failovers and migrations, workload scheduling and admission control, and Redis cluster upgrading.
+      - Enhancing observability with Prometheus metrics for database replication monitoring and performance caching in distributed systems.
+      - Supporting infrastructure automation and service orchestration using Puppet, Nomad, Consul, and Vault.
+  - company: EDO, Inc.
+    title: Senior Infrastructure Engineer
+    dates: May 2022 – Sep 2025
+    location: Los Angeles, CA (Remote)
+    items:
+      - Architected a multi-AZ OpenBao (Vault) cluster with automatic unsealing and dynamic clustering, enhancing security and efficiency.
+      - Architected and implemented a multi-region OpenVPN cluster connecting three U.S. offices and remote personnel (including contractors in the Philippines), ensuring secure and reliable cross-continental communication.
+      - Authored Jenkins Groovy libraries and self-service pipeline proposals, automating container builds and Terraform deployments supporting 20+ developers.
+      - Led SOC 2 compliance initiative for data protection and user access control, resulting in certification.
+      - Developed SonarQube infrastructure and integrated it into GitOps workflows, enabling quality and security scanning for 20+ projects.
+      - Engineered AWS infrastructure across 15+ services with Terraform/Terragrunt; modernized and created CI/CD workflows for 20+ pipelines with linting, testing, and cost analysis.
+      - Built a Python Snowpark program using async processing, in-memory caching, and thread-pool multithreading, reducing a 12-hour process to ~5 hours with a 100% success rate.
+  - company: Optoro
+    title: DevOps to Senior DevOps Engineer
+    dates: Mar 2014 – Mar 2022
+    location: Washington, DC (Remote)
+    items:
+      - Owned PostgreSQL lifecycle across AWS, Kubernetes, and Joyent SDC with near-zero downtime over 7 years supporting 22 critical microservices.
+      - Programmed SOC 2 compliance tooling in Go, enabling audit readiness for 22 microservices through dynamic backup and security monitoring.
+      - Automated provisioning of 200 nationwide shipping stations using Clonezilla PXE and custom scripts, enhancing scalability and consistency.
+      - Designed and managed CI/CD pipelines via Jenkins and GitLab CI for 4+ data stores and infrastructure services, improving deployment reliability.
+      - Implemented observability stack with Prometheus, Grafana, ELK, Alertmanager, Nagios, and New Relic supporting monitoring of 1000+ services.
+      - Managed and maintained large-scale database fleets, monitoring, metrics, alerting, and logging across AWS, Joyent SDC, and GCP.
+  - company: AOL
+    title: Data Warehouse Operations (DevOps)
+    dates: Nov 2012 – Mar 2014
+    location: Dulles, VA
+    items:
+      - Enhanced data-processing visibility by 50% for AOL platforms including Huffington Post and TechCrunch by scripting Zenoss to monitor 3M+ daily ETL records.
+      - Improved analytics workload efficiency by 25% by overseeing ETL process monitoring on Ab Initio, Hadoop, Vertica, and Oracle systems handling millions of records daily.
+      - Presented Ruby testing techniques at 6 local meetups, enhancing community engagement and testing practices.
+      - Delivered 12 TDD and acceptance-testing presentations (Ruby/Cucumber), training 30+ team members at AOL’s Data Warehouse.
+      - Mentored an intern in a 2-week program, sharing data-warehouse operations knowledge and technical skills.
+  - company: TMCI International
+    title: Analyst / Developer
+    dates: Jul 2009 – Nov 2012
+    location: Falls Church, VA
+    items:
+      - Upheld United States Secret-level security clearance for 5 years.
+      - Promoted from analyst to sole developer/maintainer of TAD, a duplicate-detection and merge system for the TRICARE Clinical Data Repository (Oracle on HP-UX).
+      - Initiated automation of analyst workflows with VBA/browser integration, cutting manual effort to near zero and multiplying throughput.
+      - Built PL/SQL + rules-based matching pipelines that scaled merges from ~100k to millions annually, proactively cleaning patient records.
+      - Applied custom phonetic matching algorithms (Soundex, Phonex) in C# DLLs integrated with a VB5 engine, improving duplicate detection by ~5%.
+      - Built a multithreaded C/pthreads engine to parallelize massive SQL updates, adapting modern C to HP-UX compiler quirks and reducing processing time by ~50%.
+      - Exhibited rapid self-learning (C, C#, PL/SQL, VBA) and integrated them into production systems.
+
+achievements:
+  - Increased VPN performance by ~50% with a multi-region setup.
+  - Ensured PostgreSQL uptime of ~99.9% over 7 years organization-wide.
+  - Optimized Python Snowpark ETL runtime by ~58%, eliminating OOM risks.
+  - Automated analyst workflows with VBA, reducing manual effort to near zero.
+
+strengths:
+  - title: Experienced Instructor
+    text: Fifteen years of teaching experience, including as a faculty member at Northern Virginia Community College. This background in education informs a proven ability to mentor and develop junior engineers, with a genuine enthusiasm for guiding others toward professional growth.
+  - title: Independent and Ownership-Oriented
+    text: Leads cross-stack infrastructure and automation projects end to end, proactively identifying improvements and driving ~25% efficiency gains through strategic architecture and tooling. Strong track record collaborating across globally distributed teams.
+
+education:
+  - school: Johns Hopkins University — Peabody Conservatory of Music
+    detail: Bachelor of Music, Classical Guitar Performance (2005–2009) · Baltimore, MD

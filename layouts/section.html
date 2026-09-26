@@ -1,0 +1,11 @@
+{{ define "main" }}
+<section aria-labelledby="section-h">
+  <h2 id="section-h">{{ .Title }}</h2>
+  {{ .Content }}
+  {{- with .Pages }}
+  {{ partial "post-list.html" . }}
+  {{- else }}
+  <p class="meta">Nothing here yet.</p>
+  {{- end }}
+</section>
+{{ end }}

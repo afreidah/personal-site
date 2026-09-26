@@ -1,0 +1,38 @@
+{{- /* One collapsible card from a projects.yaml or contributions.yaml entry. */ -}}
+<details class="item collapsible">
+  <summary>
+    <h3>
+      {{- with .logo }}<img class="card-logo" src="{{ printf "images/%s" . | relURL }}" alt=""{{ with $.logo_scale }} style="{{ printf "--logo-scale:%v" . | safeCSS }}"{{ end }}>{{ end -}}
+      <span class="proj-name">{{ .name }}</span>
+      {{- with .tagline }}<span class="proj-desc">{{ . }}</span>{{ end -}}
+    </h3>
+  </summary>
+  {{- with .summary }}
+  <p>{{ . | markdownify }}</p>
+  {{- end }}
+  {{- with .groups }}
+  <ul>
+    {{- range . }}
+    <li><strong>{{ .title }}</strong>{{ with .note }} — {{ . | markdownify }}{{ end }}
+      <ul>
+        {{- range .items }}
+        <li>{{ . | markdownify }}</li>
+        {{- end }}
+      </ul>
+    </li>
+    {{- end }}
+  </ul>
+  {{- end }}
+  {{- with .items }}
+  <ul>
+    {{- range . }}
+    <li>{{ . | markdownify }}</li>
+    {{- end }}
+  </ul>
+  {{- end }}
+  {{- with .links }}
+  <div class="repo">
+    {{- range . }}<a href="{{ .url }}" target="_blank" rel="noopener noreferrer">{{ .label }}</a>{{ end -}}
+  </div>
+  {{- end }}
+</details>

@@ -1,0 +1,504 @@
+/* =============================================================
+   THEME TOKENS
+   ============================================================= */
+:root {
+  --bg: #ffffff;
+  --fg: #111827;
+  --muted: #6b7280;
+  --accent: #2563eb;       /* blue: links + job titles */
+  --accent-red: #ef4444;   /* red: section headings + markers */
+  --nav: #c2410c;          /* orange: site nav */
+  --card: #f9fafb;
+  --border: #e5e7eb;
+  --radius: 14px;
+  --shadow: 0 1px 1px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.06);
+  --maxw: 900px;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg: #070b10;
+    --fg: #eaf0f7;
+    --muted: #a8b1bd;
+    --accent: #7db2ff;
+    --accent-red: #ff6b6b;
+    --nav: #fb923c;
+    --card: #121a25;
+    --border: #3a4a63;
+    --shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 10px 30px rgba(0,0,0,0.6);
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #070b10;
+  --fg: #eaf0f7;
+  --muted: #a8b1bd;
+  --accent: #7db2ff;
+  --accent-red: #ff6b6b;
+  --nav: #fb923c;
+  --card: #121a25;
+  --border: #3a4a63;
+  --shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 10px 30px rgba(0,0,0,0.6);
+  color-scheme: dark;
+}
+:root[data-theme='light'] {
+  --bg: #ffffff;
+  --fg: #111827;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --accent-red: #ef4444;
+  --nav: #c2410c;
+  --card: #f9fafb;
+  --border: #e5e7eb;
+  --shadow: 0 1px 1px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.06);
+  color-scheme: light;
+}
+
+/* Hover tint for clickable things */
+:root {
+  --hover-tint: color-mix(in srgb, var(--accent) 10%, var(--card));
+}
+@supports not (background: color-mix(in srgb, white, black)) {
+  :root { --hover-tint: rgba(37, 99, 235, 0.10); } /* fallback */
+}
+
+/* =============================================================
+   BASE TYPOGRAPHY + LAYOUT
+   ============================================================= */
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell,
+        Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.container {
+  max-width: var(--maxw);
+  padding: 34px 20px;
+  margin: 0 auto;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* =============================================================
+   HEADER
+   ============================================================= */
+header[role="banner"] { display: grid; gap: 8px; }
+.name { font-size: 2rem; font-weight: 800; letter-spacing: -0.01em; color: var(--muted); margin: 0; }
+.role { font-size: 1.125rem; color: var(--muted); }
+.name a { color: inherit; }
+.name a:hover { text-decoration: none; }
+
+/* Nav on the left, theme toggle on the right, above the name. */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+
+.contact { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+.contact a { color: #2dd4bf; }
+.contact span { color: var(--muted); }
+.contact .copy {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: #2dd4bf;
+  cursor: pointer;
+  position: relative;
+}
+.contact .copy:hover { text-decoration: underline; }
+.contact .copy.copied::after {
+  content: "Copied";
+  position: absolute;
+  left: 50%;
+  top: -1.6em;
+  transform: translateX(-50%);
+  font-size: .75rem;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  white-space: nowrap;
+}
+.contact .ico { width: 15px; height: 15px; vertical-align: -2px; margin-right: 6px; }
+.btn {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--fg);
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+}
+
+/* =============================================================
+   SECTIONS + HEADINGS
+   ============================================================= */
+section { margin: 28px 0; }
+h2 {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #56b6e8;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+  margin-bottom: 12px;
+}
+
+/* =============================================================
+   CARDS
+   ============================================================= */
+.item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  margin-bottom: 10px;
+  position: relative;
+  transition: background .15s ease, border-color .15s ease, transform .12s ease;
+}
+.item h3 { margin: 0; font-size: 1.0625rem; color: var(--accent); }
+.meta { color: var(--muted); font-size: .94rem; }
+
+/* Bullets */
+ul { margin: 8px 0 0 18px; }
+li { margin: 6px 0; }
+ul li::marker { color: #2dd4bf; }
+
+/* Project card body: links + spacing under the header */
+.item.collapsible > p:first-of-type { margin-top: 12px; }
+.repo { margin-top: 10px; font-size: .94rem; }
+.repo a { color: #2dd4bf; }
+.repo a + a { margin-left: 22px; }
+/* Links shown in the collapsed card header (right column of the summary). */
+.repo-head { margin-top: 0; white-space: nowrap; }
+
+/* =============================================================
+   PRINT
+   ============================================================= */
+@media (print) {
+  .btn, .actions, .screen-only { display: none !important; }
+  a[href]::after { content: none !important; }
+  .item { break-inside: avoid; page-break-inside: avoid; }
+  body { font-size: 12pt; }
+  .container { padding: .25in .5in; }
+}
+.footnote { font-size: .8rem; color: var(--muted); margin-top: 6px; }
+
+/* =============================================================
+   COLLAPSIBLE CARDS (whole box hover, header-only cursor)
+   ============================================================= */
+details.item.collapsible {
+  cursor: default;        /* content area normal */
+  overflow: hidden;       /* keep rounded corners clean */
+}
+details.item.collapsible:hover {
+  background: var(--hover-tint);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+@supports not (background: color-mix(in srgb, white, black)) {
+  details.item.collapsible:hover {
+    border-color: rgba(37, 99, 235, 0.45);
+  }
+}
+
+/* Header line remains the click target (hand cursor only here) */
+.item.collapsible summary {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 6px 10px;
+  cursor: pointer;        /* only header shows hand */
+  outline: none;
+  color: var(--fg);
+
+  /* stretch header to card edges for visual balance */
+  margin: -14px -16px 0 -16px;
+  padding: 6px 16px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  border-bottom: 1px solid transparent;
+  transition: border-color .15s ease;
+}
+/* When collapsed, bleed the header to the card's bottom edge so the
+   space above and below the logo stays symmetric and tight. */
+.item.collapsible:not([open]) summary { margin-bottom: -14px; }
+.item.collapsible[open] summary { border-bottom-color: var(--border); }
+.item.collapsible summary h3 { margin: 0; color: var(--accent); }
+.proj-name { color: var(--muted); font-weight: 400; font-size: 1.14rem; }
+.proj-desc { color: #2dd4bf; font-weight: 400; font-size: 0.95rem; margin-left: 10px; }
+/* Projects: keep each header on a single line. Logo and name stay full;
+   the tagline takes the remaining width and truncates with an ellipsis
+   instead of wrapping. Repo links live in the card body, not the header. */
+.proj-section .item.collapsible summary { display: block; }
+.proj-section .item.collapsible summary h3 { display: flex; align-items: center; min-width: 0; }
+.proj-section .card-logo { flex: 0 0 auto; }
+/* Fixed name column so every tagline starts at the same x (widest name,
+   "Cloudflare Log Collector", measures ~219px). */
+.proj-section .proj-name { flex: 0 0 auto; white-space: nowrap; min-width: 225px; }
+.proj-section .proj-desc {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Professional experience headers: same color scheme, titles aligned
+   via a fixed-width company column. */
+.exp-company { display: inline-block; width: 184px; color: var(--muted); font-weight: 400; font-size: 1.14rem; }
+.exp-title { color: #2dd4bf; font-weight: 400; }
+.item.collapsible summary .meta { color: var(--muted); }
+
+/* Focus style for keyboard access */
+.item.collapsible summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* Remove native disclosure arrows */
+.item.collapsible summary::-webkit-details-marker { display: none; }
+.item.collapsible summary::marker { content: ""; }
+
+/* Space between header and content list */
+.item.collapsible > ul { margin-top: 10px; }
+
+/* =============================================================
+   SKILLS — compact inline DL
+   ============================================================= */
+.item.skill-compact { padding: 10px 12px; }
+dl.skills.tight {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 12px;
+  row-gap: 10px;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+dl.skills.tight dt {
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+dl.skills.tight dd {
+  margin: 0;
+  color: #2dd4bf;
+}
+dl.skills.tight .sk-comma { color: var(--muted); }
+
+/* =============================================================
+   ACHIEVEMENTS — Two-column tick list (no boxes, no hover)
+   ============================================================= */
+.ach {
+  list-style: none;
+  padding-left: 0;
+  margin: 12px 0 0 0;
+}
+.ach.ticks.two-col {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 18px;
+}
+.ach.ticks li {
+  position: relative;
+  padding-left: 22px;
+  line-height: 1.45;
+}
+.ach.ticks li::before {
+  content: "";
+  position: absolute; left: 0; top: 4px;
+  width: 14px; height: 14px; background: #2dd4bf;
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="%23000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>') no-repeat center / contain;
+          mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="%23000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>') no-repeat center / contain;
+}
+@media (max-width: 720px) {
+  .ach.ticks.two-col { grid-template-columns: 1fr; }
+}
+
+/* =============================================================
+   PROJECT CARD LOGO (before project titles)
+   ============================================================= */
+.card-logo,
+.card-logo-spacer {
+  display: inline-block;
+  width: 116px;
+  height: 44px;
+  margin-right: 40px;
+  vertical-align: middle;
+}
+.card-logo {
+  object-fit: contain;
+  object-position: center;
+  /* Per-logo visual size tweak without shifting title alignment.
+     Set style="--logo-scale:1.25" on an individual img (1 = default). */
+  transform: scale(var(--logo-scale, 1));
+  transform-origin: center;
+}
+
+
+/* =============================================================
+   SITE NAV
+   ============================================================= */
+.site-nav { display: flex; gap: 22px; font-size: .9rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+.site-nav a {
+  color: var(--nav);
+  padding-bottom: 2px;
+  border-bottom: 2px solid transparent;
+  transition: border-color .15s ease, filter .15s ease;
+}
+.site-nav a:hover { text-decoration: none; filter: brightness(1.15); border-bottom-color: color-mix(in srgb, var(--nav) 50%, transparent); }
+.site-nav a[aria-current="page"] { border-bottom-color: var(--nav); }
+
+/* =============================================================
+   POST LIST
+   ============================================================= */
+.post-list { list-style: none; margin: 12px 0 0 0; padding: 0; }
+.post-list li { display: grid; grid-template-columns: 110px 1fr; gap: 2px 16px; margin: 0 0 14px 0; }
+.post-list time { color: var(--muted); font-size: .94rem; }
+.post-list a { font-size: 1.0625rem; }
+.post-list p { grid-column: 2; margin: 0; color: var(--muted); font-size: .94rem; }
+.more { margin-top: 6px; font-size: .94rem; }
+@media (max-width: 640px) {
+  .post-list li { grid-template-columns: 1fr; }
+  .post-list p { grid-column: 1; }
+}
+
+/* =============================================================
+   POST BODY
+   ============================================================= */
+.post { margin-top: 28px; }
+.post-header { border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 18px; }
+.post-header h1 { font-size: 1.75rem; line-height: 1.25; margin: 0 0 4px 0; color: var(--fg); }
+.post h2 { margin-top: 32px; }
+
+/* Long-form post rhythm: real section breaks and room around code and figures. */
+.post-body { font-size: 1.0625rem; line-height: 1.75; }
+.post-body > p { margin: 0 0 1.25em; }
+.post-body > h2 {
+  margin: 64px 0 20px;
+  padding: 28px 0 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 0;
+  font-size: 1.45rem;
+  line-height: 1.3;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  color: var(--nav);
+}
+.post-body > h3 { margin: 40px 0 12px; font-size: 1.15rem; }
+.post-body > pre,
+.post-body > .highlight { margin: 28px 0 36px; }
+.post-body pre { font-size: .85rem; line-height: 1.6; padding: 16px 18px; }
+.post-body > .post-figure { margin: 36px 0 44px; }
+
+/* Hand-written text diagrams: a plain pre with the key names highlighted. */
+.post-body > pre.diagram { background: var(--card); color: var(--fg); }
+.diagram .hl { color: #2dd4bf; font-weight: 600; }
+/* Prose links are underlined so they read as links inside a paragraph. */
+.post-body a:not(.zoom) {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.post-body a:not(.zoom):hover { text-decoration-color: var(--accent); }
+
+/* Link buttons under a post title, from the links front matter */
+.post-links { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 0; padding: 0; list-style: none; }
+.post-links a {
+  display: inline-block;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: #2dd4bf;
+  font-size: .9rem;
+  box-shadow: var(--shadow);
+  transition: border-color .15s ease, background .15s ease;
+}
+.post-links a:hover { text-decoration: none; border-color: #2dd4bf; background: var(--hover-tint); }
+.post-links a::after { content: " ↗"; opacity: .7; }
+.post h3 { margin-top: 24px; color: var(--accent); }
+.post img { max-width: 100%; height: auto; border-radius: 8px; }
+
+/* Captioned, clickable screenshots */
+.post-figure { margin: 28px 0 32px; }
+.post-figure .zoom {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  cursor: zoom-in;
+  transition: border-color .15s ease;
+}
+.post-figure .zoom:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+.post-figure img { display: block; width: 100%; border-radius: 0; }
+.post-figure figcaption {
+  margin-top: 10px;
+  font-size: .9rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.post-figure figcaption::after { content: " Click to enlarge."; opacity: .7; }
+
+.zoom-dialog {
+  max-width: 96vw;
+  max-height: 96vh;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  cursor: zoom-out;
+}
+.zoom-dialog::backdrop { background: rgba(0, 0, 0, .8); }
+.zoom-dialog img { display: block; max-width: 96vw; max-height: 96vh; width: auto; height: auto; }
+.zoom-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--fg);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.post blockquote { margin: 16px 0; padding: 2px 16px; border-left: 3px solid #2dd4bf; color: var(--muted); }
+.post :not(pre) > code {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: .9em;
+}
+.post pre {
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  overflow-x: auto;
+  font-size: .9rem;
+  line-height: 1.5;
+}
+.post table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+.post th, .post td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; }
+
+/* =============================================================
+   NARROW SCREENS
+   ============================================================= */
+/* The fixed logo and name columns overflow a phone; shrink the logo and
+   let the tagline drop instead. */
+@media (max-width: 640px) {
+  .card-logo, .card-logo-spacer { width: 64px; height: 32px; margin-right: 14px; }
+  .proj-section .proj-name { min-width: 0; white-space: normal; }
+  .proj-section .proj-desc { display: none; }
+  .exp-company { display: block; width: auto; }
+}

@@ -1,0 +1,21 @@
+{{ define "main" }}
+{{- with .Content }}
+<section id="about" aria-labelledby="about-h">
+  <h2 id="about-h">About</h2>
+  {{ . }}
+</section>
+{{- end }}
+
+{{- $posts := where site.RegularPages "Section" "posts" }}
+{{- with $posts }}
+<section id="posts" aria-labelledby="posts-h">
+  <h2 id="posts-h">Recent Posts</h2>
+  {{ partial "post-list.html" (first 5 .) }}
+  {{- if gt (len .) 5 }}
+  <p class="more"><a href="{{ "/posts/" | relURL }}">All posts</a></p>
+  {{- end }}
+</section>
+{{- end }}
+
+{{ partial "cards.html" . }}
+{{ end }}

@@ -1,0 +1,67 @@
+{{ define "main" }}
+{{- $r := site.Data.resume }}
+<section id="summary" aria-labelledby="summary-h">
+  <h2 id="summary-h">Professional Summary</h2>
+  <p>{{ $r.summary }}</p>
+</section>
+
+<section id="skills" aria-labelledby="skills-h">
+  <h2 id="skills-h">Skills</h2>
+  <article class="item skill-compact">
+    <dl class="skills tight">
+      {{- range $r.skills }}
+      <dt>{{ .label }}</dt>
+      <dd>{{ range $i, $s := .items }}{{ if $i }}<span class="sk-comma">,</span> {{ end }}{{ $s }}{{ end }}</dd>
+      {{- end }}
+    </dl>
+  </article>
+</section>
+
+<section id="experience" aria-labelledby="exp-h">
+  <h2 id="exp-h">Professional Experience</h2>
+  {{- range $r.experience }}
+  <details class="item collapsible">
+    <summary>
+      <h3><span class="exp-company">{{ .company }}</span><span class="exp-title">{{ .title }}</span></h3>
+      <div class="meta">{{ .dates }} · {{ .location }}</div>
+    </summary>
+    <ul>
+      {{- range .items }}
+      <li>{{ . | markdownify }}</li>
+      {{- end }}
+    </ul>
+  </details>
+  {{- end }}
+</section>
+
+<section id="achievements" aria-labelledby="ach-h">
+  <h2 id="ach-h">Key Achievements</h2>
+  <ul class="ach ticks two-col">
+    {{- range $r.achievements }}
+    <li>{{ . }}</li>
+    {{- end }}
+  </ul>
+</section>
+
+{{ partial "cards.html" . }}
+
+<section id="strengths" aria-labelledby="str-h">
+  <h2 id="str-h">Strengths</h2>
+  {{- range $r.strengths }}
+  <div>
+    <h3>{{ .title }}</h3>
+    <p>{{ .text }}</p>
+  </div>
+  {{- end }}
+</section>
+
+<section id="education" aria-labelledby="edu-h">
+  <h2 id="edu-h">Education</h2>
+  {{- range $r.education }}
+  <div>
+    <h3>{{ .school }}</h3>
+    <p>{{ .detail }}</p>
+  </div>
+  {{- end }}
+</section>
+{{ end }}

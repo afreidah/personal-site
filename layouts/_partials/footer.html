@@ -1,0 +1,8 @@
+<footer class="meta" aria-label="Footer">
+  {{- if eq .Layout "resume" }}
+  <span class="screen-only">Updated: {{ site.Data.resume.updated }}</span>
+  {{- end }}
+  <p class="footnote">
+    Served from my homelab Nomad/Consul cluster via Cloudflare tunnel ingress, Traefik routing via Consul service discovery, and Docker. Infrastructure managed with Terraform, Terragrunt, and Chef.
+  </p>
+</footer>

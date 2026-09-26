@@ -1,0 +1,31 @@
+baseURL = "https://alexfreidah.com/"
+languageCode = "en-us"
+title = "Alex Freidah"
+enableRobotsTXT = true
+disableKinds = ["taxonomy", "term"]
+
+[params]
+  role = "Senior Infrastructure / Platform Engineer"
+  description = "Senior Infrastructure / Platform Engineer, 15+ years across cloud and bare-metal: HashiCorp stack, Terraform, Go services, CI/CD, infrastructure as code (IaC)."
+  email = "alex.freidah@gmail.com"
+  github = "https://github.com/afreidah"
+  linkedin = "https://www.linkedin.com/in/alex-freidah/"
+  discord = "afreidah"
+  location = "Los Angeles, CA"
+  analyticsScript = "https://analytics.alexfreidah.com/script.js"
+  analyticsWebsiteID = "ffc8f029-e06c-4b39-9cb1-7a74a7e8e7bc"
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+# Stand-alone images render as figures, which can't be nested in a <p>.
+[markup.goldmark.parser]
+  wrapStandAloneImageWithinParagraph = false
+
+[markup.highlight]
+  noClasses = true
+  style = "github-dark"
+
+[outputs]
+  home = ["HTML", "RSS"]
+  section = ["HTML", "RSS"]

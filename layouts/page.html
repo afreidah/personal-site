@@ -1,0 +1,20 @@
+{{ define "main" }}
+<article class="post">
+  <header class="post-header">
+    <h1>{{ .Title }}</h1>
+    {{- if eq .Section "posts" }}
+    <p class="meta"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "January 2, 2006" }}</time> · {{ .ReadingTime }} min read</p>
+    {{- end }}
+    {{- with .Params.links }}
+    <ul class="post-links">
+      {{- range . }}
+      <li><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">{{ .label }}</a></li>
+      {{- end }}
+    </ul>
+    {{- end }}
+  </header>
+  <div class="post-body">
+    {{ .Content }}
+  </div>
+</article>
+{{ end }}

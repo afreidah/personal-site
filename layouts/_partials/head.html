@@ -1,0 +1,34 @@
+{{- $title := cond .IsHome (printf "%s — %s" site.Title site.Params.role) (printf "%s — %s" .Title site.Title) }}
+{{- /* Bing flags descriptions over 160 characters; the home page uses the site description rather than its About text. */ -}}
+{{- $desc := cond .IsHome site.Params.description (or .Description .Summary site.Params.description) | plainify | truncate 160 }}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark light" />
+<link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
+<title>{{ $title }}</title>
+<meta name="description" content="{{ $desc }}" />
+{{- if eq .Kind "404" }}
+<meta name="robots" content="noindex" />
+{{- else }}
+<link rel="canonical" href="{{ .Permalink }}" />
+{{- end }}
+
+<meta property="og:type" content="{{ if eq .Section "posts" }}article{{ else }}profile{{ end }}" />
+<meta property="og:url" content="{{ .Permalink }}" />
+<meta property="og:site_name" content="{{ site.Title }}" />
+<meta property="og:title" content="{{ $title }}" />
+<meta property="og:description" content="{{ $desc }}" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="{{ $title }}" />
+<meta name="twitter:description" content="{{ $desc }}" />
+{{- with site.GetPage "/posts" }}{{ with .OutputFormats.Get "rss" }}
+<link rel="alternate" type="application/rss+xml" href="{{ .Permalink }}" title="{{ site.Title }} — Posts" />
+{{- end }}{{ end }}
+
+{{- with resources.Get "css/styles.css" | minify | fingerprint }}
+<link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" />
+{{- end }}
+{{- with site.Params.analyticsWebsiteID }}
+<script defer src="{{ site.Params.analyticsScript }}" data-website-id="{{ . }}"></script>
+{{- end }}
+{{- partial "jsonld.html" . }}

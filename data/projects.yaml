@@ -1,0 +1,236 @@
+# Project cards rendered on both the home page and /resume.
+# Bullet text is inline Markdown.
+- name: S3 Orchestrator
+  logo: s3-orchestrator.png
+  tagline: Multi-cloud S3 proxy with replication/compression/encryption
+  summary: An S3-compatible proxy presenting many object-storage providers as one endpoint, backed by a metadata layer tracking every object's placement, replicas, and quota.
+  groups:
+    - title: Quotas and cost control
+      items:
+        - Stacks per-backend byte quotas into one logical bucket with pack and spread routing; each backend also carries monthly request, ingress, and egress budgets
+        - Requests meter through named pools rather than one allowance, matching how a provider actually bills — Class A separate from Class B, deletes charged to nothing
+        - Pools are additive, so a per-operation sub-cap can sit inside an aggregate one
+    - title: Data handling
+      items:
+        - Multi-cloud replication at a configurable factor
+        - At-rest chunked zstd compression; storage and transfer are billed separately, so it cuts both, and the chunked format keeps range reads cheap
+        - Envelope encryption with chunked AES-256-GCM so backends only ever see ciphertext
+        - Master key from config, a key file, or Vault Transit, which wraps DEKs without the orchestrator ever holding key material; rotation re-wraps existing DEKs while older objects stay readable
+    - title: Resilience
+      items:
+        - Per-backend and per-database circuit breakers, with degraded-mode reads on DB outage
+        - Admission control sheds load before saturation, degrades to reduced service rather than failing outright, and recovers once backends return
+        - "Twelve background workers on leased ticks: replication, rebalance, over-replication cleanup, lifecycle, reconciliation, scrub, and a durable cleanup queue with dead-letter handling"
+    - title: Operating it
+      items:
+        - Metadata layer in PostgreSQL or embedded SQLite (sqlc), with multipart uploads built on it
+        - SigV4 authentication with multi-bucket credential isolation and rate limiting
+        - Hot-reloadable backend and quota config
+        - "Four ways to drive it: web dashboard, admin API, CLI, and a read-only TUI browser"
+        - "Terraform/OpenTofu provider on both public registries: bucket, user, credential and grant resources, with acceptance tests running plan/apply/import against an orchestrator in a container"
+        - OpenTelemetry tracing and Prometheus metrics throughout, with a Grafana dashboard pre-wired to the metrics it emits
+        - Compression, encryption, integrity scrubbing, object caching, rate limiting, and webhook notifications are each independently opt-in
+  links:
+    - { label: Project Page, url: "https://s3-orchestrator.munchbox.cc/" }
+    - { label: GitHub, url: "https://github.com/afreidah/s3-orchestrator" }
+    - { label: Terraform Registry, url: "https://registry.terraform.io/providers/afreidah/s3-orchestrator/latest/docs" }
+    - { label: OpenTofu Registry, url: "https://search.opentofu.org/provider/afreidah/s3-orchestrator/latest" }
+
+- name: Munchbox
+  logo: munchbox.png
+  tagline: Production-grade homelab on Nomad/Consul/Vault
+  summary: A homelab platform spanning bare metal, Proxmox VMs, and Oracle free-tier cloud nodes linked over WireGuard, provisioned end to end as code.
+  groups:
+    - title: Three layers, each owning an interface to the next
+      items:
+        - "Terragrunt provisions the substrate: OCI instances and volumes, Proxmox VMs, S3 buckets across seven providers, the KMS key Vault auto-unseals with, Cloudflare DNS and tunnel config"
+        - It also manages what can't be provisioned — Vault mounts, policies, PKI, SSH CA, JWT and AppRole; Consul and Nomad ACLs; Forgejo CI secrets and Vaultwarden items synced out of Vault
+        - Cinc converges every node from composable roles — a machine's run_list is other roles, not a recipe list, so its identity is a stack of capabilities and the per-node file holds only what's genuinely per-machine
+        - "Ordering carries meaning: SSH CA and PKI recipes run after the Vault agent because they read the token it writes to disk"
+        - Nomad runs the workloads, most through one pack that standardizes Vault wiring, Traefik tags, health checks, scrape config, and tracing, so a new service inherits ingress, auth, and observability without writing any of it
+    - title: Security
+      items:
+        - Every Consul, Nomad, Vault, and Docker handshake is mutual TLS, issued from a Vault PKI intermediate
+        - A `vault-cert-manager` daemon renews certs in place and reloads each service the way it tolerates — reload for Consul, restart for Nomad, SIGHUP for Vault
+        - "Four separate auth paths: Vault SSH CA for humans and automation, AppRole for Chef, Nomad Workload Identity for jobs, Google OAuth through oauth2-proxy for people hitting public services"
+        - Nothing is port-forwarded — public traffic arrives through a Cloudflare tunnel, so there are no inbound NAT rules
+    - title: Availability
+      items:
+        - Consul, Nomad, and Vault run three-node Raft; Patroni fronts two Postgres nodes behind HAProxy reading its REST endpoint live; Redis runs two nodes with Sentinel
+        - Ingress is a pair, each node running the full stack — Traefik, cloudflared, oauth2-proxy, keepalived — so a VRRP failover lands on a complete path rather than half of one
+        - "DNS is layered: a CoreDNS system job on every node forwards to dnsdist on the floating VIP, which spreads queries across both Pi-holes, with the Pi-holes listed behind it so a dead VIP falls straight through, and each Pi-hole running its own unbound"
+    - title: Data
+      items:
+        - Object storage goes through s3-orchestrator across thirteen backends; SQL is Patroni PG18 with app databases created by Terraform; images live in a Docker registry on NFS; an aptly APT repo publishes into an S3 bucket
+        - Backups, Trivy scans, cert issuance, and cleanup run as Temporal workflows on a schedule
+    - title: Observability
+      items:
+        - Every node runs Alloy for logs and host metrics; Prometheus discovers scrape targets through Consul rather than a static list
+        - Grafana dashboards over Prometheus, Loki, and Tempo, with the service graph built from OTLP traces
+        - Alertmanager routes to a webhook that force-restarts Nomad jobs that fail their checks
+    - title: Custom services in-tree
+      items:
+        - "`vault-cert-manager` — the PKI daemon, with an aggregator mode that discovers every instance through Consul and flags certs where what's on disk differs from what the service is actually serving"
+        - "`trivy-dashboard` — reads CVE results from a Postgres replica and Temporal workflow state, served from a single Go binary with templates embedded"
+        - "`dashboard` — a Hugo-built service index for everything running in the cluster"
+  links:
+    - { label: GitHub, url: "https://github.com/afreidah/munchbox" }
+
+- name: Cloudflare Log Collector
+  logo: cloudflare-log-collector.png
+  logo_scale: 0.85
+  tagline: Cloudflare telemetry into Loki, Prometheus, and Grafana
+  summary: Polls Cloudflare's GraphQL and REST APIs and ships the results into an existing observability stack — four datasets, structured logs to Loki, metrics to Prometheus.
+  groups:
+    - title: Datasets
+      items:
+        - "Firewall events: one JSON line per WAF event with action, client IP, path, rule ID, country, user agent"
+        - "HTTP traffic: request and byte counts grouped by method, status, and country, pushed to both Loki and Prometheus"
+        - "RUM: page views and sessions by country and device, plus Core Web Vitals p75 (LCP, INP, FID, FCP, TTFB, CLS) as gauges, scoped per Web Analytics site"
+        - "Account audit logs: administrative actions with actor, resource, and result"
+    - title: Collection
+      items:
+        - Seek cursor per dataset advances on event timestamp, so a poll cycle never re-ingests what the last one already shipped
+        - Multi-zone and multi-account; poll interval, backfill window, and batch size are configurable
+        - Cloudflare's GraphQL API allows 300 queries per 5 minutes; two queries per zone per cycle stays well inside it
+        - Retries 429 and 5xx with exponential backoff, honouring `Retry-After`; a result set hitting the API's cap logs a truncation warning rather than silently dropping events
+        - RUM and audit collection are off by default — both need account-scoped tokens
+    - title: Output
+      items:
+        - Loki streams labelled by type and zone, with `X-Scope-OrgID` for multi-tenant deployments
+        - "Fourteen Prometheus metrics: poll counts and latency per dataset and zone, last successful poll timestamp, event counters, and the Web Vitals gauges"
+        - OpenTelemetry tracing with trace and span IDs injected into log lines, so a Loki line links straight to its trace in Grafana
+        - Ships with a Grafana dashboard built against these metrics
+    - title: Packaging
+      items:
+        - Debian package with a systemd unit, Docker image, and Nomad job; releases automated by release-please and GoReleaser
+  links:
+    - { label: Project Page, url: "https://cloudflare-log-collector.munchbox.cc/" }
+    - { label: GitHub, url: "https://github.com/afreidah/cloudflare-log-collector" }
+
+- name: Nomad Temporal Jobs
+  logo: nomad-temporal-jobs.png
+  tagline: Temporal workers automating cluster ops
+  summary: Temporal workflow workers automating recurring operations across a Nomad/Consul/Vault cluster — seven worker images, nine cron-scheduled workflows, six task queues. Schedules are defined in Terraform.
+  groups:
+    - title: Runner scaler
+      note: autoscaling GitHub self-hosted runners on Nomad. Nothing runs when nothing is queued.
+      items:
+        - Watched repos and their config live as JSON in Consul KV; a missing or malformed key fails the tick rather than silently watching nothing
+        - Polls each repo every 30 seconds for Actions jobs queued against a self-hosted runner
+        - "Labels select the runner: an ordered list maps a label to a Nomad job and image, first match wins; a plain `self-hosted` job falls through to the default"
+        - "GitHub binds a self-hosted runner to one repo unless you're an org, so registration is resolved per repo: mint a short-lived token, or pass a secret path and let the runner use the repo's own PAT"
+        - Image, labels and credentials pass into a parameterized Nomad job as metadata; the runner registers, claims the job, runs it, exits
+        - Counts runners already booting before dispatching more; per-repo and per-pool caps leave overflow queued on GitHub
+        - Each runner watched to completion, then its Nomad job deleted — one-hour ceiling so a wedged runner is still cleaned up
+    - title: Backup and scanning
+      items:
+        - Snapshots Nomad, Consul (which holds Vault's data), and PostgreSQL concurrently; databases dump in parallel and upload to S3, with local and off-site copies expiring on separate schedules
+        - Trivy pulls running images from Nomad and scans them for CVEs, separating failures worth retrying from ones that never will be
+    - title: Cleanup and maintenance
+      note: four workflows on one shared worker
+      items:
+        - Deletes alloc directories left by jobs that no longer exist and prunes unused Docker images; also reclaims a second copy `docker system prune` can't see, checking which image store Docker actually uses so it never removes a live one
+        - "Registry GC and aptly cleanup take their service offline: scale to zero, work, always scale back — even if the work fails, times out, or the workflow is cancelled. The work step never retries, so half-finished cleanup isn't run twice"
+        - Online `VACUUM (ANALYZE)` across every database, bounded fan-out so the primary isn't overwhelmed
+    - title: Secrets and certificates
+      items:
+        - Renews the wildcard TLS certificate via Let's Encrypt DNS challenges; issuing and publishing are separate steps, so a publish failure doesn't request a second certificate and hit the rate limit. The private key never enters Temporal history
+        - "Replaces hand-rotated PATs: mints a fresh short-lived token per repo each run, encrypts it against that repo's public key, writes it to the repo's Actions secret"
+    - title: Media import
+      items:
+        - Finds torrents downloaded outside Sonarr and Radarr, invisible to Jellyfin because nothing queued them; hardlinks only the episodes actually missing, leaving the torrent seeding
+    - title: Throughout
+      items:
+        - Nothing runs a remote shell — Nomad and Consul snapshots through their own APIs, remote Docker over an SSH tunnel, files over SFTP. Only `pg_dump` shells out, having no Go equivalent
+        - Workers authenticate to Vault through Nomad Workload Identity, so no tokens are written into job files
+        - Every external call is traced, drawing the service graph in Grafana
+  links:
+    - { label: Project Page, url: "https://nomad-temporal-jobs.munchbox.cc/" }
+    - { label: GitHub, url: "https://github.com/afreidah/nomad-temporal-jobs" }
+
+- name: g3
+  logo: g3.png
+  logo_scale: 0.85
+  tagline: S3-compatible object storage on Google Drive
+  summary: An S3 gateway that stores object data in Google Drive and metadata in Gmail, so any S3 client can use a Google account as a backend.
+  groups:
+    - title: Storage model
+      items:
+        - A bucket is a Gmail label, an object is a Drive file, and its metadata is a Gmail message whose body holds the Drive file ID, content type, ETag, size, and user metadata
+        - The object key is the email subject, which makes Gmail search the fallback index if the local one is lost
+        - A local SQLite or PostgreSQL index maps bucket/key to both IDs — SQLite for a single node, Postgres when the service needs to run anywhere in a cluster
+    - title: API
+      items:
+        - Object CRUD, bucket create/head/list, and the full multipart set
+        - HeadObject and ListObjectsV2 resolve entirely from the index, costing zero Google API calls; GetObject and DeleteObject use cached IDs to skip Gmail search
+        - Multipart parts buffer individually and stream in order through `io.MultiReader` on completion, so a large object is never assembled in memory; abandoned uploads expire after an hour
+        - PutObject streams straight to Drive by resumable upload, so object size is bounded by Drive's 5TB limit rather than by memory
+        - SigV4 authentication, so it works unmodified with the AWS CLI, s3cmd, or any S3 SDK — including as an s3-orchestrator backend
+    - title: Operating it
+      items:
+        - Drive and Gmail have separate quotas (12,000 requests/min and 250 units/sec), so each gets its own rate-limit pool
+        - "`g3 sync` rebuilds the index from Gmail after data loss or a host migration; `g3 auth` walks the OAuth flow and prints a refresh token; `g3 validate` checks a config without starting the server"
+        - Prometheus metrics, OpenTelemetry tracing with trace and span IDs in the logs, audit logging, and liveness/readiness endpoints
+  links:
+    - { label: Project Page, url: "https://g3.munchbox.cc/" }
+    - { label: GitHub, url: "https://github.com/afreidah/g3" }
+
+- name: Oracle Watchdog
+  logo: oracle-watchdog.png
+  tagline: Auto-recovers stuck Oracle Cloud free-tier nodes
+  summary: A distributed heartbeat monitor that detects Oracle Cloud free-tier instances reclaimed out from under you and restarts them through the OCI API.
+  groups:
+    - title: Monitor mode
+      note: runs on each Oracle node as a systemd service
+      items:
+        - Holds a Consul session with a 30-second TTL, renewed every 10s, locking a KV pair at `oracle-watchdog/nodes/{node}`
+        - The session uses `delete` behaviour, so when a node goes silent the session expires and Consul removes the key by itself — no timeout logic, no polling from the node side
+        - State machine of `disconnected → connecting → active`, falling back and retrying whenever Consul is unreachable
+    - title: Agent mode
+      note: runs off the monitored nodes, on the homelab
+      items:
+        - Polls Consul for missing keys; a node absent longer than the timeout gets an OCI stop, a poll to `STOPPED`, a start, and a poll to `RUNNING`
+        - Tracks consecutive attempts per node and resets the count once a node recovers
+        - Restart timeout, max attempts per node, duplicate-restart prevention while one is in flight, and a dry-run mode
+    - title: Two optional side jobs, both default-off
+      items:
+        - "WireGuard endpoint resolver: re-resolves a peer hostname on an interval and rewrites the kernel peer endpoint over netlink when the IP moves, forcing an early re-resolve when the last handshake goes stale"
+        - "Cloudflare DDNS: detects the host's public IPv4 through fallback HTTP providers and updates an A record only on change, with a cooldown between writes. The API token is read from the environment at startup and never enters the config struct"
+    - title: Operating it
+      items:
+        - "Each mode exposes its own metrics, so a node stuck in a restart loop is visible rather than silent: whether Consul and OCI are reachable, how many nodes are currently missing, and restart attempts against successes per node"
+        - Deploys the way each mode needs — a Debian package with a systemd unit for the Oracle nodes, a Docker image or Nomad job for the agent — with a Grafana dashboard built against those metrics
+  links:
+    - { label: Project Page, url: "https://oracle-watchdog.munchbox.cc/" }
+    - { label: GitHub, url: "https://github.com/afreidah/oracle-watchdog" }
+
+- name: Flight Fetcher
+  logo: flight-fetcher.png
+  tagline: Real-time tracker for aircraft overhead
+  summary: Tracks aircraft around a configurable location, enriching each one with registration, type, operator, and route, and plotting them on a live map.
+  groups:
+    - title: Sources
+      items:
+        - OpenSky Network's API, a local ADS-B receiver (dump1090, readsb, PiAware), or both running concurrently on independent intervals into the same cache
+        - Receiver-only makes no metered API calls for positions, but global squawk monitoring needs OpenSky's endpoint, so that setup doesn't get it
+        - A bounding-box query narrowed by haversine distance, so the radius is actually circular rather than a box
+    - title: Enrichment
+      items:
+        - A new ICAO24 triggers an aircraft lookup — registration, manufacturer, type, operator — through HexDB with OpenSky as fallback
+        - A new callsign triggers a route lookup through AirLabs with FlightAware AeroAPI as fallback, cached for 24 hours so routes refresh daily
+        - Both run in a background worker pool, so a slow external API never stalls a poll cycle, and results cache in PostgreSQL so each aircraft is looked up once
+        - All external clients share one HTTP client with exponential backoff on 429s, 5xx, and transport failures
+    - title: Squawk monitoring
+      items:
+        - Reads transponder codes for local aircraft, and optionally polls OpenSky globally for the emergency codes — 7500 hijack, 7600 radio failure, 7700 general emergency
+        - Deduplicates before alerting, and dispatches to pluggable backends (Discord, Telegram)
+    - title: Storage and serving
+      items:
+        - Redis holds current state with a TTL of three poll intervals, so aircraft age out of the map on their own when they leave the area
+        - PostgreSQL holds sightings, metadata, routes, and alerts through sqlc-generated queries, with goose migrations run at startup and a retention worker doing batched deletes to avoid lock contention
+        - "Split-pane dashboard: flight cards and squawk alerts on the left, a persistent Leaflet map with rotated aircraft icons on the right, selection synced between them"
+        - Degrades rather than errors — `/api/flights` returns an empty array if Redis is down, and `/healthz` reports per-component healthy/degraded/unhealthy
+        - OpenTelemetry tracing, Prometheus metrics, trace IDs injected into JSON logs, and a Grafana dashboard
+  links:
+    - { label: GitHub, url: "https://github.com/afreidah/flight-fetcher" }

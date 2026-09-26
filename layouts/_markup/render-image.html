@@ -1,0 +1,9 @@
+{{- /* Markdown images render as a captioned figure; the title becomes the caption and a click opens the full-size image. */ -}}
+<figure class="post-figure">
+  <a href="{{ .Destination | safeURL }}" class="zoom" aria-label="Open full-size image">
+    <img src="{{ .Destination | safeURL }}" alt="{{ .Text }}" loading="lazy">
+  </a>
+  {{- with .Title }}
+  <figcaption>{{ . | markdownify }}</figcaption>
+  {{- end }}
+</figure>

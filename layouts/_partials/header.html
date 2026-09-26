@@ -1,0 +1,33 @@
+{{- $isResume := eq .Layout "resume" }}
+<header role="banner">
+  <div class="topbar">
+    <nav class="site-nav" aria-label="Site">
+      <a href="{{ "/" | relURL }}"{{ if .IsHome }} aria-current="page"{{ end }}>Home</a>
+      <a href="{{ "/resume/" | relURL }}"{{ if $isResume }} aria-current="page"{{ end }}>Resume</a>
+      <a href="{{ "/posts/" | relURL }}"{{ if eq .Section "posts" }} aria-current="page"{{ end }}>Posts</a>
+    </nav>
+    <button class="btn" id="theme-toggle" aria-pressed="true" title="Toggle theme"
+      data-label-dark="Dark Theme" data-label-light="Light Theme">Light Theme</button>
+  </div>
+
+  {{- /* One h1 per page: a post's title is its h1, so the site name drops to a paragraph there. */ -}}
+  {{- if and .IsPage (eq .Section "posts") }}
+  <p class="name"><a href="{{ "/" | relURL }}">{{ site.Title }}</a></p>
+  {{- else }}
+  <h1 class="name">{{ site.Title }}</h1>
+  {{- end }}
+  <div class="role">{{ if $isResume }}{{ site.Data.resume.role_line }}{{ else }}{{ site.Params.role }}{{ end }}</div>
+
+  <div class="contact">
+    {{- if $isResume }}
+    {{- with site.Data.resume.phone }}
+    <a href="tel:{{ replace . "-" "" }}">{{ partial "icon.html" "phone" }}Phone</a>
+    {{- end }}
+    {{- end }}
+    <a href="mailto:{{ site.Params.email }}">{{ partial "icon.html" "mail" }}Email</a>
+    <a href="{{ site.Params.github }}" target="_blank" rel="noopener noreferrer">{{ partial "icon.html" "github" }}GitHub</a>
+    <a href="{{ site.Params.linkedin }}" target="_blank" rel="noopener noreferrer">{{ partial "icon.html" "linkedin" }}LinkedIn</a>
+    <button type="button" class="copy" data-copy="{{ site.Params.discord }}" title="Copy Discord username">{{ partial "icon.html" "discord" }}{{ site.Params.discord }}</button>
+    <span class="screen-only">{{ partial "icon.html" "pin" }}{{ site.Params.location }}</span>
+  </div>
+</header>

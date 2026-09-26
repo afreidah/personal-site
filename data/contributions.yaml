@@ -1,0 +1,17 @@
+# Open source contribution cards, same schema as projects.yaml.
+- name: HashiCorp Nomad Bug Fix
+  logo: nomad.png
+  summary: Diagnosed and fixed a Nomad state-store bug where jobs written in the same Raft transaction (such as mass rescheduling after a node failure) shared a `ModifyIndex` and silently vanished from the `/v1/jobs/statuses` endpoint and the web UI jobs page, while still appearing via `/v1/jobs` and the CLI.
+  items:
+    - "Root cause: the jobs-table `modify_index` memdb index was declared unique, but `ModifyIndex` is not unique across jobs, so colliding jobs were dropped from any query iterating that index"
+    - Submitted a written root-cause analysis, a live-cluster reproduction, and a self-contained Docker A/B harness that proves the bug and verifies the fix
+    - Fix marks the index non-unique and adds a regression test; reviewed and merged into hashicorp/nomad
+  links:
+    - { label: View PR, url: "https://github.com/hashicorp/nomad/pull/28158" }
+
+- name: Go Protobuf Library Contribution
+  logo: go-logo.png
+  logo_scale: 0.68
+  summary: Fixed a typo in the Go protobuf library, discovered through a custom CI/CD pipeline I designed for a backend service. Registered as a Go contributor and pushed the fix through Gerrit per the contribution rules; merged in version 1.25.
+  links:
+    - { label: View Change, url: "https://go-review.googlesource.com/c/protobuf/+/697595" }
