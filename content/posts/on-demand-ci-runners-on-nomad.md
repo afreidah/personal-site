@@ -2,7 +2,6 @@
 title: "On-Demand CI Runners on Nomad with Temporal"
 date: 2026-09-25
 description: "Ephemeral self-hosted GitHub Actions runners that only exist while a job is queued, with a registration token minted per runner."
-draft: true
 links:
   - { label: "Project page", url: "https://nomad-temporal-jobs.munchbox.cc" }
   - { label: "Runner scaler diagram", url: "https://nomad-temporal-jobs.munchbox.cc/diagrams/runnerscaler-workflow/" }
