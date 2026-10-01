@@ -76,6 +76,32 @@
   links:
     - { label: GitHub, url: "https://github.com/afreidah/munchbox" }
 
+- name: Munchbox Hashi Upgrade
+  logo: munchbox-hashi-upgrade.png
+  tagline: Resumable rolling upgrades for Nomad, Consul, and Vault
+  summary: Surveys a cluster through its own API, writes a run file whose task order and gates come from what each host carries, and drives it host by host through cinc-client. The file is the journal, so a run that stops for any reason resumes by naming it again.
+  groups:
+    - title: A run
+      items:
+        - "`plan` surveys and writes the run file without changing anything; `run` carries it out; `status` reads where it got to and needs no cluster or credentials"
+        - Stops the scheduled Cinc converges and moves the version pin, upgrades each non-coordinating server in turn, hands coordination off and upgrades the last, then every client, and reads the fleet back before releasing the converges
+        - Between hosts, a gate polls the cluster until it reports the host back at the target version, healthy and in service — never a sleep, and a timeout names the condition it gave up on
+    - title: Design
+      items:
+        - Topology is discovered, never declared; a host holding two roles is recorded once, as a server, so one host never spends the cluster's fault tolerance twice
+        - Servers before clients, one at a time — a cluster tolerates its servers running ahead of its clients, not the reverse
+        - The run file records which boundaries need a person, so confirmations can be reviewed before anything runs
+        - Each tool's differences live in one client behind interfaces; adding a tool is a package, not a change to the runner, steps, or gates
+        - No automatic downgrade. A failed run stops and reports; compensations restore converge timers and drained hosts, never a version or the pin
+        - Resuming starts at the first unsettled task and won't step over one that failed or never reported back, since whether it took effect is exactly what's unknown
+    - title: Testing
+      items:
+        - The unit tier embeds cinc-server-ng as a library, so pins are written and read back through the real Chef API with real signature verification
+        - A local fleet per tool in Docker Compose, one release behind the target, with stand-in `systemctl` and `cinc-client`; the Vault fleet adds the Consul it stores in and a second Vault for transit auto-unseal
+        - Driven against production for all three — Nomad 2.0.5 → 2.0.7 across 12 hosts, Consul 2.0.3 → 2.0.4 across 17, Vault 2.0.4 → 2.1.1 across 3
+  links:
+    - { label: GitHub, url: "https://github.com/afreidah/munchbox-hashi-upgrade" }
+
 - name: Cloudflare Log Collector
   logo: cloudflare-log-collector.png
   logo_scale: 0.85
@@ -148,6 +174,34 @@
   links:
     - { label: Project Page, url: "https://nomad-temporal-jobs.munchbox.cc/" }
     - { label: GitHub, url: "https://github.com/afreidah/nomad-temporal-jobs" }
+
+- name: Vagabond
+  logo: vagabond.png
+  tagline: Compute broker for short-lived workloads (early prototype)
+  summary: Describe a job once in Nomad-style HCL; Vagabond decides which backend can run it and which one should, runs it there, and reports the result. Backends are cloud platforms or your own machines.
+  groups:
+    - title: Scheduling
+      items:
+        - Thirteen admission checks across policy, availability, capability, and quota decide which providers can run a task; `max_cost_usd` defaults to 0, so work stays on free capacity unless a job opts in to paying
+        - Survivors are scored and ranked by tier, strictly or weighted, and `job plan` prints every provider with its score or the rule it failed and why
+        - Admission never calls a provider — it reads capability and quota snapshots gathered ahead of time, so a plan works offline and reserves nothing
+        - Free-tier quota pools per provider with optional per-namespace shares; reservations are atomic across processes, and settlement uses what the platform billed when it reports it
+    - title: Backends
+      items:
+        - Provider plugins translate a task into their platform's API and classify its failures; scheduling, retries, and accounting stay in the control plane. Google Cloud Run Jobs and AWS Lambda are implemented
+        - "`vagabond agent` joins a machine to a named pool over mutual TLS and runs workloads on it, held to the CPU and memory the agent is allowed — as plain containers on containerd, or each in its own Firecracker microVM where stronger isolation is wanted"
+        - Nodes advertise their executors and each one's isolation level, so a job that needs a VM per task says so with a constraint
+        - Inside a microVM, a minimal guest init runs the workload the agent wrote into the root filesystem before boot and returns its output and exit code over vsock — the agent decides everything, the guest only executes
+    - title: Server
+      items:
+        - Modeled on Nomad without depending on it — a CLI and HTTP API for submitting, registering, and dispatching jobs, with registered jobs versioned on change and parameterized at dispatch
+        - Postgres or CockroachDB store; dispatches are leased, so a server resumes the ones a dead process left running
+        - Store outages fail closed — new work gets a 503, running work finishes, and what the outage lost is repaired when the store returns
+        - A rejected cloud credential is refreshed and the call retried once
+        - Three architectural boundaries enforced by `depguard`
+  links:
+    - { label: Project Page, url: "https://vagabond.munchbox.cc/" }
+    - { label: GitHub, url: "https://github.com/afreidah/vagabond" }
 
 - name: g3
   logo: g3.png
