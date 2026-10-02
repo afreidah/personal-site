@@ -1,21 +1,51 @@
 {{ define "main" }}
-{{- with .Content }}
-<section id="about" aria-labelledby="about-h">
-  <h2 id="about-h">About</h2>
-  {{ . }}
-</section>
-{{- end }}
-
 {{- $posts := where site.RegularPages "Section" "posts" }}
-{{- with $posts }}
-<section id="posts" aria-labelledby="posts-h">
-  <h2 id="posts-h">Recent Posts</h2>
-  {{ partial "post-list.html" (first 5 .) }}
-  {{- if gt (len .) 5 }}
-  <p class="more"><a href="{{ "/posts/" | relURL }}">All posts</a></p>
-  {{- end }}
-</section>
-{{- end }}
+<div class="railed">
+  <div class="rail-body">
+    {{- with .Content }}
+    <section id="about" aria-labelledby="about-h">
+      <h2 id="about-h">About</h2>
+      {{ . }}
+    </section>
+    {{- end }}
 
-{{ partial "cards.html" . }}
+    {{- with $posts }}
+    <section id="posts" aria-labelledby="posts-h">
+      <h2 id="posts-h">Recent Posts</h2>
+      {{ partial "post-list.html" (first 5 .) }}
+      {{- if gt (len .) 5 }}
+      <p class="more"><a href="{{ "/posts/" | relURL }}">All posts</a></p>
+      {{- end }}
+    </section>
+    {{- end }}
+
+    {{ partial "cards.html" . }}
+  </div>
+
+  {{- /* Every project is named, because the cards are collapsed by default and
+         a section heading alone does not say what is under it. */ -}}
+  <aside class="rail" aria-label="On this page">
+    <nav class="rail-toc">
+      <p class="rail-head">On this page</p>
+      <ul>
+        {{- with .Content }}<li><a href="#about">About</a></li>{{ end }}
+        {{- with $posts }}<li><a href="#posts">Recent Posts</a></li>{{ end }}
+      </ul>
+
+      <p class="rail-head rail-head--gap">Projects</p>
+      <ul>
+        {{- range site.Data.projects }}
+        <li><a href="#{{ anchorize .name }}">{{ .name }}</a></li>
+        {{- end }}
+      </ul>
+
+      <p class="rail-head rail-head--gap">Open Source</p>
+      <ul>
+        {{- range site.Data.contributions }}
+        <li><a href="#{{ anchorize .name }}">{{ .name }}</a></li>
+        {{- end }}
+      </ul>
+    </nav>
+  </aside>
+</div>
 {{ end }}

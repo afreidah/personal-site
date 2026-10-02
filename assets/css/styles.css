@@ -172,6 +172,30 @@ ul li::marker { color: #2dd4bf; }
 
 /* Project card body: links + spacing under the header */
 .item.collapsible > p:first-of-type { margin-top: 12px; }
+
+/* An expanded card is otherwise an undifferentiated block of body text: the
+   group titles carry the structure, so they are set apart rather than left as
+   bold runs, and their items hang off a rule that shows where each group ends.
+   Scoped to groups via :has, since a card with a flat item list has no titles
+   and keeps its markers. */
+.item.collapsible > ul > li:has(> strong) { list-style: none; margin: 16px 0 0 -18px; }
+.item.collapsible > ul > li > strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--nav);
+}
+.item.collapsible > ul > li > ul {
+  margin-left: 2px;
+  padding-left: 16px;
+  border-left: 2px solid var(--border);
+}
+.item.collapsible > ul > li > ul > li { margin: 5px 0; }
+/* The lead paragraph is the card's summary, not another bullet. */
+.item.collapsible > p:first-of-type { color: var(--muted); }
 .repo { margin-top: 10px; font-size: .94rem; }
 .repo a { color: #2dd4bf; }
 .repo a + a { margin-left: 22px; }
@@ -230,8 +254,10 @@ details.item.collapsible:hover {
 .item.collapsible:not([open]) summary { margin-bottom: -14px; }
 .item.collapsible[open] summary { border-bottom-color: var(--border); }
 .item.collapsible summary h3 { margin: 0; color: var(--accent); }
-.proj-name { color: var(--muted); font-weight: 400; font-size: 1.14rem; }
-.proj-desc { color: #2dd4bf; font-weight: 400; font-size: 0.95rem; margin-left: 10px; }
+/* The name carries the colour and the tagline supports it, so the row reads
+   name-first rather than leading with the description. */
+.proj-name { color: #2dd4bf; font-weight: 400; font-size: 1.14rem; }
+.proj-desc { color: var(--muted); font-weight: 400; font-size: 0.95rem; margin-left: 10px; }
 /* Projects: keep each header on a single line. Logo and name stay full;
    the tagline takes the remaining width and truncates with an ellipsis
    instead of wrapping. Repo links live in the card body, not the header. */
@@ -490,6 +516,75 @@ dl.skills.tight .sk-comma { color: var(--muted); }
 }
 .post table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
 .post th, .post td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; }
+
+/* =============================================================
+   SECTION RAIL
+   ============================================================= */
+/* The home page and any long post get their sections in a sticky column,
+   which needs more room than the reading width the rest of the site uses.
+   The wider container is set per page, so only a page with a rail widens. */
+.container--wide { max-width: 1180px; }
+
+.rail { font-size: .9rem; }
+.rail-head {
+  margin: 0 0 8px;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--nav);
+}
+/* Between groups in a rail that has more than one. */
+.rail-head--gap { margin-top: 20px; }
+.rail-toc ul { margin: 0; padding: 0; list-style: none; }
+.rail-toc li { margin: 0; }
+.rail-toc a {
+  display: block;
+  padding: 5px 0 5px 12px;
+  border-left: 2px solid var(--border);
+  color: var(--muted);
+  line-height: 1.35;
+}
+.rail-toc a:hover { color: var(--fg); text-decoration: none; border-left-color: var(--muted); }
+/* Set by toc.js against whichever section is in view. */
+.rail-toc a.is-current { color: var(--accent); border-left-color: var(--accent); }
+
+.post-links--rail { flex-direction: column; align-items: flex-start; gap: 8px; margin: 0 0 26px; }
+.rail-back { margin: 22px 0 0; padding-top: 16px; border-top: 1px solid var(--border); }
+.rail-back a { color: var(--muted); }
+.rail-back a::before { content: "\2190  "; }
+.rail-back a:hover { color: var(--fg); }
+
+/* Two columns only where both fit. Below this the rail stacks above the body,
+   which keeps the links reachable without squeezing the text. */
+@media (min-width: 1040px) {
+  .railed {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    column-gap: 52px;
+    align-items: start;
+  }
+  /* Row 1 holds a post's header and collapses to nothing on a page without
+     one, so both pages place their body and rail on row 2. */
+  .railed > .post-header { grid-column: 1 / -1; grid-row: 1; }
+  .railed > .rail-body { grid-column: 1; grid-row: 2; }
+  .railed > .rail {
+    grid-column: 2;
+    grid-row: 2;
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+  }
+}
+@media (max-width: 1039px) {
+  .rail { margin: 18px 0 30px; }
+  .post-links--rail { flex-direction: row; align-items: center; }
+  .rail-toc, .rail-back { display: none; }
+}
+@media print {
+  .rail { display: none; }
+}
 
 /* =============================================================
    NARROW SCREENS
