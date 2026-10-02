@@ -81,7 +81,7 @@
   tagline: Resumable rolling upgrades for Nomad, Consul, and Vault
   summary: Surveys a cluster through its own API, writes a run file whose task order and gates come from what each host carries, and drives it host by host through cinc-client. The file is the journal, so a run that stops for any reason resumes by naming it again.
   groups:
-    - title: A run
+    - title: Running an upgrade
       items:
         - "`plan` surveys and writes the run file without changing anything; `run` carries it out; `status` reads where it got to and needs no cluster or credentials"
         - Stops the scheduled Cinc converges and moves the version pin, upgrades each non-coordinating server in turn, hands coordination off and upgrades the last, then every client, and reads the fleet back before releasing the converges

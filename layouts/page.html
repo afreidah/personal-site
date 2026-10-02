@@ -1,19 +1,42 @@
 {{ define "main" }}
-<article class="post">
+{{- /* A post long enough to have sections gets a rail of them; nothing else
+       does, and neither does a post with only one or two headings. */ -}}
+{{- $railed := and (eq .Section "posts") (ge (len (findRE "<li>" .TableOfContents)) 4) }}
+<article class="post{{ if $railed }} railed{{ end }}">
   <header class="post-header">
     <h1>{{ .Title }}</h1>
     {{- if eq .Section "posts" }}
     <p class="meta"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "January 2, 2006" }}</time> · {{ .ReadingTime }} min read</p>
     {{- end }}
-    {{- with .Params.links }}
+    {{- /* The links move into the rail when there is one, so they stay in
+           reach while scrolling rather than scrolling away with the title. */ -}}
+    {{- if and .Params.links (not $railed) }}
     <ul class="post-links">
-      {{- range . }}
+      {{- range .Params.links }}
       <li><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">{{ .label }}</a></li>
       {{- end }}
     </ul>
     {{- end }}
   </header>
-  <div class="post-body">
+
+  {{- if $railed }}
+  <aside class="rail" aria-label="About this post">
+    {{- with .Params.links }}
+    <ul class="post-links post-links--rail">
+      {{- range . }}
+      <li><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">{{ .label }}</a></li>
+      {{- end }}
+    </ul>
+    {{- end }}
+    <nav class="rail-toc" aria-label="Sections">
+      <p class="rail-head">On this page</p>
+      {{ .TableOfContents }}
+    </nav>
+    <p class="rail-back"><a href="{{ "/posts/" | relURL }}">All posts</a></p>
+  </aside>
+  {{- end }}
+
+  <div class="post-body rail-body">
     {{ .Content }}
   </div>
 </article>

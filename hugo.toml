@@ -22,6 +22,13 @@ disableKinds = ["taxonomy", "term"]
 [markup.goldmark.parser]
   wrapStandAloneImageWithinParagraph = false
 
+# The post rail lists sections, so only h2. Nesting a second level into a
+# 220px column reads as a wall of wrapped text.
+[markup.tableOfContents]
+  startLevel = 2
+  endLevel = 2
+  ordered = false
+
 [markup.highlight]
   noClasses = true
   style = "github-dark"

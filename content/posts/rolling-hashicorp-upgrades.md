@@ -10,7 +10,30 @@ links:
 
 Seventeen hosts in my cluster run Consul, twelve run Nomad, three run Vault. Upgrading any of them follows the same rules. Servers tolerate running ahead of clients, not the reverse. One server goes down at a time, and only while the rest can still coordinate. The host that coordinates hands that off deliberately rather than by going away.
 
-My binaries are installed by configuration management. A version pin lives in a `versions` data bag, read by a [small library](https://github.com/afreidah/munchbox/blob/main/infrastructure/cinc/cookbooks/munchbox_lib/libraries/pinned_version.rb) that every tool's cookbook calls, and each host's `cinc-client` run installs whatever the pin says. The [`consul`](https://github.com/afreidah/munchbox/tree/main/infrastructure/cinc/cookbooks/consul), [`nomad`](https://github.com/afreidah/munchbox/tree/main/infrastructure/cinc/cookbooks/nomad) and [`vault`](https://github.com/afreidah/munchbox/tree/main/infrastructure/cinc/cookbooks/vault) cookbooks all resolve their version the same way:
+My binaries are installed by [Cinc](https://cinc.sh/), the free distribution of Chef. Every host runs `cinc-client` on a timer, converging it to whatever its cookbooks describe.
+
+The version each tool should be running is not in those cookbooks. It lives in a `versions` data bag, read by a [small library](https://github.com/afreidah/munchbox/blob/main/infrastructure/cinc/cookbooks/munchbox_lib/libraries/pinned_version.rb):
+
+```ruby
+# The bag is the only place a version is declared. munchbox-hashi-upgrade
+# writes it as part of a rolling upgrade; this repository declares no version
+# at all, so there is no second copy to drift from and bumping one is an API
+# call rather than a pull request.
+#
+# Missing pins raise. A pin only goes absent through misconfiguration -- the
+# bag comes from the same Chef server as the cookbooks, so a node that cannot
+# read it never got far enough to converge -- and falling back to a literal
+# would install a stale version instead of naming the problem.
+def pinned_version(tool)
+  item = data_bag_item(VERSIONS_DATA_BAG, tool)
+  version = item['version'].to_s
+  raise "munchbox_lib: #{VERSIONS_DATA_BAG}/#{tool} has no 'version' field" if version.empty?
+
+  version
+end
+```
+
+The [`consul`](https://github.com/afreidah/munchbox/tree/main/infrastructure/cinc/cookbooks/consul), [`nomad`](https://github.com/afreidah/munchbox/tree/main/infrastructure/cinc/cookbooks/nomad) and [`vault`](https://github.com/afreidah/munchbox/tree/main/infrastructure/cinc/cookbooks/vault) cookbooks all call it the same way, and each restarts its service when the version it installed changes:
 
 ```ruby
 vault_install 'vault' do
@@ -20,7 +43,7 @@ vault_install 'vault' do
 end
 ```
 
-An upgrade is therefore not a binary push. It is: stop the scheduled converges, move the pin, converge the hosts in the right order, and check the cluster between each one.
+So nothing upgrades by pushing a binary at a host. Changing the data bag changes what every host installs at its next converge, which means an upgrade is: stop the scheduled converges so no host moves on its own, change the pin, then converge the hosts deliberately, in the right order, checking the cluster between each one.
 
 This tool is that sequence.
 
@@ -34,9 +57,13 @@ This tool is that sequence.
 
 ```
 hashi-upgrade plan consul --to 2.0.4
-hashi-upgrade run consul-munchbox-20261001T062815Z.yaml
+  -> consul-munchbox-20261001T062815Z.yaml
+
+hashi-upgrade run    consul-munchbox-20261001T062815Z.yaml
 hashi-upgrade status consul-munchbox-20261001T062815Z.yaml
 ```
+
+`plan` names the file after the tool, the cluster it read, and the time it read it. The cluster name keeps two clusters planned from the same directory apart, and the timestamp means planning again writes a new file rather than overwriting the record of a run that already happened.
 
 ## Task order
 
@@ -307,9 +334,67 @@ Migrating Vault to raft storage later requires no change here.
 
 Restarting a Vault node leaves it sealed until the KMS unseals it. `sys/ha-status` does not report that, so each node is also asked `sys/health` at its own address, which does. A sealed node then counts as unhealthy, and a gate waiting on one says it is sealed rather than blaming the version.
 
-## Test environments
+## A configuration server in the test binary
 
-Each tool has a Docker Compose environment: three servers and two clients for Nomad and Consul, three servers for Vault. Each starts a release behind the version to plan toward, since a fleet already at the target plans a run whose every task is a no-op.
+Everything above moves a pin on a Chef server, so the tests have to prove a pin written there can be read back. Stubbing the HTTP calls proves only that the client called the paths its author expected, which is the same author who wrote the assertions.
+
+[`cinc-server-ng`](https://github.com/cinc-project/cinc-server-ng) is that server as a Go library, so the tests run against a real one, in process:
+
+```go
+// live starts a configuration server and returns a client that authenticates
+// to it as the bootstrap admin.
+func live(t *testing.T) *Cinc {
+	t.Helper()
+
+	srv, err := server.New(server.Options{Orgs: []string{testOrg}})
+	if err != nil {
+		t.Fatalf("new configuration server: %v", err)
+	}
+	if err := srv.Start(); err != nil {
+		t.Fatalf("start configuration server: %v", err)
+	}
+	t.Cleanup(func() { srv.Stop(context.Background()) })
+
+	c, err := New(Options{
+		ServerURL:  srv.URL() + "/organizations/" + testOrg,
+		ClientName: srv.AdminName(),
+		KeyPath:    writeTemp(t, "admin.pem", srv.AdminKey()),
+	})
+	...
+}
+```
+
+Real data bags and real Mixlib signature verification on both halves of the round trip, in 0.08 seconds, with no Docker and no build tag. These are ordinary unit tests:
+
+```go
+func TestPinRoundTrip(t *testing.T) {
+	c := live(t)
+
+	if err := c.SetPin(t.Context(), "nomad", "2.0.6"); err != nil {
+		t.Fatalf("SetPin: %v", err)
+	}
+
+	got, err := c.Pin(t.Context(), "nomad")
+	...
+}
+```
+
+The signing is the part this earns. The client signs every request the way Chef expects, and a stub would have accepted a signature that no server would.
+
+## Container fleets
+
+Each tool also has a Docker Compose environment: three servers and two clients for Nomad and Consul, three servers for Vault. Each starts a release behind the version to plan toward, since a fleet already at the target plans a run whose every task is a no-op.
+
+They are driven by hand, the same way a real fleet is:
+
+```
+TOOL=consul make cluster-up      # start it, behind the version to plan toward
+TOOL=consul make cluster-plan    # survey it and write a run file
+TOOL=consul make cluster-run     # drive the file; ARGS=--yes to skip prompts
+TOOL=consul make cluster-down    # stop it and discard its state
+```
+
+Each is a separate Compose project on its own configuration-server port, so more than one can be up at once. That matters when a change touches shared code: the Vault work altered the gate conditions and the successor choice for every tool, and having the Nomad and Consul fleets still running is what proved it had not broken them.
 
 The hosts carry stand-ins for the two things a container does not have: a `systemctl` that answers the timer commands, and a `cinc-client` that reads the pin and installs it. That covers the orchestration around a converge. Whether a cookbook installs Consul correctly belongs to [the cookbook](https://github.com/afreidah/munchbox/tree/main/infrastructure/cinc/cookbooks/consul), which is tested on its own.
 
@@ -317,7 +402,44 @@ The Vault environment runs two services that are not part of the fleet being upg
 
 Four faults found in these environments:
 
-**An unhealthy cluster read as healthy.** Nomad's autopilot reports one as HTTP 429 carrying the health reply, and the API client treats every non-2xx as an error and discards the body. `Cluster.Healthy` could only ever be true, so every gate reading it was checking nothing.
+**The gates' check for an unhealthy cluster could never fail.** Nomad's autopilot answers 200 when the cluster is healthy and 429 when it is not, with the same health document in the body either way. The Go client turns any non-2xx into an error and drops the body, so an unhealthy cluster came back to me as a failed read, never as a snapshot saying `Healthy: false`.
+
+A gate treats a failed read as "not yet" and polls again, so every snapshot a gate ever received had come from a 200, where healthy is true by definition. The `!cluster.Healthy` condition was evaluated on every poll and was never once true.
+
+The fix is to pull the body back out of the error, but only for that one status. Anything else stays an error, because a cluster that cannot be read is a different problem from one that reads as unwell:
+
+```go
+// unhealthyReply recovers the health reply autopilot sends with a 429.
+//
+// The status is how autopilot says the cluster is not healthy, which is a
+// condition a run waits out rather than an error it stops for. Any other
+// status, or a body that will not parse, is left as the error it was: a
+// cluster that cannot be read is different from one that reads as unwell.
+func unhealthyReply(err error) (*api.OperatorHealthReply, bool) {
+	var resp api.UnexpectedResponseError
+	if !errors.As(err, &resp) || resp.StatusCode() != http.StatusTooManyRequests {
+		return nil, false
+	}
+
+	var health api.OperatorHealthReply
+	if json.Unmarshal([]byte(resp.Body()), &health) != nil {
+		return nil, false
+	}
+
+	return &health, true
+}
+```
+
+The survey calls it on the one error path it has, and fails as before when it returns false.
+
+Consul uses the same 429 convention for an unhealthy datacenter, but its Go client accepts that status and parses the body rather than erroring on it, so the Consul survey needed no equivalent:
+
+```go
+// we use 429 status to indicate unhealthiness
+_, resp, err := op.c.doRequest(r)
+...
+err = requireHttpCodes(resp, 200, 429)
+```
 
 **The server gate waited on a timestamp that does not move.** An agent that goes down and comes back inside one health interval is never seen unhealthy. `StableSince` therefore still reads from before the restart, and the gate cannot pass a host that has already arrived.
 

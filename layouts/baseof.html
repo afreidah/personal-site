@@ -3,13 +3,20 @@
 <head>
   {{- partial "head.html" . }}
 </head>
+{{- /* A post with a section rail needs a wider container than the reading
+       width every other page uses. Decided the same way page.html decides
+       whether to draw the rail at all. */ -}}
+{{- $wide := .IsHome }}
+{{- if and .IsPage (eq .Section "posts") }}
+  {{- if ge (len (findRE "<li>" .TableOfContents)) 4 }}{{ $wide = true }}{{ end }}
+{{- end }}
 <body>
-  <main class="container">
+  <main class="container{{ if $wide }} container--wide{{ end }}">
     {{- partial "header.html" . }}
     {{- block "main" . }}{{ end }}
     {{- partial "footer.html" . }}
   </main>
-  {{- with slice (resources.Get "js/theme.js") (resources.Get "js/copy.js") (resources.Get "js/zoom.js") | resources.Concat "js/site.js" | minify | fingerprint }}
+  {{- with slice (resources.Get "js/theme.js") (resources.Get "js/copy.js") (resources.Get "js/zoom.js") (resources.Get "js/toc.js") | resources.Concat "js/site.js" | minify | fingerprint }}
   <script defer src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}"></script>
   {{- end }}
 </body>

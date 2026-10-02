@@ -1,5 +1,7 @@
-{{- /* One collapsible card from a projects.yaml or contributions.yaml entry. */ -}}
-<details class="item collapsible">
+{{- /* One collapsible card from a projects.yaml or contributions.yaml entry.
+       The id is what the section rail links to, so it is derived from the name
+       rather than the position: reordering the data must not move the links. */ -}}
+<details class="item collapsible" id="{{ anchorize .name }}">
   <summary>
     <h3>
       {{- with .logo }}<img class="card-logo" src="{{ printf "images/%s" . | relURL }}" alt=""{{ with $.logo_scale }} style="{{ printf "--logo-scale:%v" . | safeCSS }}"{{ end }}>{{ end -}}
