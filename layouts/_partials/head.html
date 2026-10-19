@@ -28,7 +28,10 @@
 {{- with resources.Get "css/styles.css" | minify | fingerprint }}
 <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" />
 {{- end }}
-{{- with site.Params.analyticsWebsiteID }}
-<script defer src="{{ site.Params.analyticsScript }}" data-website-id="{{ . }}"></script>
+{{- /* Cloudflare Web Analytics beacon. The edge does not inject it despite
+  auto_install, so it is emitted here; production builds only so local
+  previews stay out of the dataset. */ -}}
+{{- if and hugo.IsProduction site.Params.webAnalyticsToken }}
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "{{ site.Params.webAnalyticsToken }}"}'></script>
 {{- end }}
 {{- partial "jsonld.html" . }}
