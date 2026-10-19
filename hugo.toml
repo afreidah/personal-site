@@ -12,8 +12,8 @@ disableKinds = ["taxonomy", "term"]
   linkedin = "https://www.linkedin.com/in/alex-freidah/"
   discord = "afreidah"
   location = "Los Angeles, CA"
-  analyticsScript = "https://analytics.alexfreidah.com/script.js"
-  analyticsWebsiteID = "ffc8f029-e06c-4b39-9cb1-7a74a7e8e7bc"
+  # Public by design (ships in the page source); names the Web Analytics site.
+  webAnalyticsToken = "cde24484aa254648a5f6277dc5e298e7"
 
 [markup.goldmark.renderer]
   unsafe = true
