@@ -15,7 +15,7 @@
   {{- with .groups }}
   <ul>
     {{- range . }}
-    <li><strong>{{ .title }}</strong>{{ with .note }} — {{ . | markdownify }}{{ end }}
+    <li><strong>{{ .title | markdownify }}</strong>{{ with .note }} — {{ . | markdownify }}{{ end }}
       <ul>
         {{- range .items }}
         <li>{{ . | markdownify }}</li>

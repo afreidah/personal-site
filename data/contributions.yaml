@@ -1,13 +1,20 @@
 # Open source contribution cards, same schema as projects.yaml.
-- name: HashiCorp Nomad Bug Fix
+- name: HashiCorp Nomad Bug Fixes (2)
   logo: nomad.png
-  summary: Diagnosed and fixed a Nomad state-store bug where jobs written in the same Raft transaction (such as mass rescheduling after a node failure) shared a `ModifyIndex` and silently vanished from the `/v1/jobs/statuses` endpoint and the web UI jobs page, while still appearing via `/v1/jobs` and the CLI.
-  items:
-    - "Root cause: the jobs-table `modify_index` memdb index was declared unique, but `ModifyIndex` is not unique across jobs, so colliding jobs were dropped from any query iterating that index"
-    - Submitted a written root-cause analysis, a live-cluster reproduction, and a self-contained Docker A/B harness that proves the bug and verifies the fix
-    - Fix marks the index non-unique and adds a regression test; reviewed and merged into hashicorp/nomad
-  links:
-    - { label: View PR, url: "https://github.com/hashicorp/nomad/pull/28158" }
+  summary: Two fixes to how the Nomad web UI jobs page and its `/v1/jobs/statuses` endpoint list jobs, both merged into hashicorp/nomad.
+  groups:
+    - title: "Jobs missing from the statuses endpoint and UI ([PR #28158](https://github.com/hashicorp/nomad/pull/28158))"
+      items:
+        - Jobs written in the same Raft transaction (such as mass rescheduling after a node failure) share a `ModifyIndex`, and silently vanished from the endpoint and the UI while still appearing via `/v1/jobs` and the CLI
+        - "Root cause: the jobs-table `modify_index` memdb index was declared unique, but `ModifyIndex` is not unique across jobs, so colliding jobs were dropped from any query iterating that index"
+        - Submitted a written root-cause analysis, a live-cluster reproduction, and a self-contained Docker A/B harness; the fix marks the index non-unique, adds a regression test, and was backported to release branches
+        - Found and reported the pagination bug the fix exposed, which led to the follow-up below
+    - title: "Jobs list pagination ([PR #28178](https://github.com/hashicorp/nomad/pull/28178))"
+      items:
+        - With the index non-unique, a cursor built from `ModifyIndex` alone duplicated jobs at page boundaries, stalled on large tied groups so older jobs became unreachable, and broke the "Last" page
+        - Added a namespace/ID tiebreaker to the cursor matching the state store's walk order, with older bare-index tokens still accepted
+        - Reworked the UI to page only with server-issued tokens, so a mixed-version cluster mid-upgrade still pages correctly in either direction
+        - Also fixed jobs outside the active filter appearing when paging backward, and paging after a refresh or from a shared link; covered by Go and UI acceptance tests
 
 - name: Go Protobuf Library Contribution
   logo: go-logo.png
