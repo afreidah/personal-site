@@ -16,6 +16,16 @@
         - Reworked the UI to page only with server-issued tokens, so a mixed-version cluster mid-upgrade still pages correctly in either direction
         - Also fixed jobs outside the active filter appearing when paging backward, and paging after a refresh or from a shared link; covered by Go and UI acceptance tests
 
+- name: Listed on awesome-selfhosted
+  logo: awesome-selfhosted.svg
+  summary: Got [s3-orchestrator](https://github.com/afreidah/s3-orchestrator) accepted into [awesome-selfhosted](https://awesome-selfhosted.net/), the curated directory of free self-hostable software. It's listed under File Transfer - Object Storage & File Servers.
+  items:
+    - Wrote the entry in the project's YAML schema (description, license, platforms, tag) and submitted it to awesome-selfhosted-data; the maintainers reviewed and merged it
+  links:
+    - { label: View PR, url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/pull/3121" }
+    - { label: View Listing, url: "https://awesome-selfhosted.net/index.html#s3-orchestrator" }
+    - { label: awesome-selfhosted, url: "https://github.com/awesome-selfhosted/awesome-selfhosted" }
+
 - name: Go Protobuf Library Contribution
   logo: go-logo.png
   logo_scale: 0.68
