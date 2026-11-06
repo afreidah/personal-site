@@ -2,7 +2,6 @@
 title: "Routing S3 Egress Through a Cloudflare Worker"
 date: 2026-11-05
 description: "An overview of routing S3 reads through a Cloudflare Worker to avoid egress charges, and how I set it up for three storage providers."
-draft: true
 links:
   - { label: "Guide", url: "https://s3-orchestrator.munchbox.cc/guides/cloudflare-edge-proxy/" }
   - { label: "Worker source", url: "https://github.com/afreidah/s3-orchestrator/tree/main/deploy/cloudflare-worker" }
