@@ -1,12 +1,15 @@
-{{- /* One collapsible card from a projects.yaml or contributions.yaml entry.
+{{- /* One collapsible row from a projects.yaml or contributions.yaml entry: an
+       icon, then the name with its tagline beneath, expanding to the details.
        The id is what the section rail links to, so it is derived from the name
        rather than the position: reordering the data must not move the links. */ -}}
 <details class="item collapsible" id="{{ anchorize .name }}">
   <summary>
     <h3>
-      {{- with .logo }}<img class="card-logo" src="{{ printf "images/%s" . | relURL }}" alt=""{{ with $.logo_scale }} style="{{ printf "--logo-scale:%v" . | safeCSS }}"{{ end }}>{{ end -}}
-      <span class="proj-name">{{ .name }}</span>
-      {{- with .tagline }}<span class="proj-desc">{{ . }}</span>{{ end -}}
+      {{- with .logo }}<img class="card-logo" src="{{ printf "images/%s" . | relURL }}" alt=""{{ with $.logo_scale }} style="{{ printf "--logo-scale:%v" . | safeCSS }}"{{ end }}>{{ else }}<span class="card-logo-spacer"></span>{{ end -}}
+      <span class="proj-text">
+        <span class="proj-name">{{ .name }}</span>
+        {{- with .tagline }}<span class="proj-desc">{{ . }}</span>{{ end -}}
+      </span>
     </h3>
   </summary>
   {{- with .summary }}

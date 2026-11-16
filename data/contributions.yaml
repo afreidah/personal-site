@@ -1,34 +1,50 @@
-# Open source contribution cards, same schema as projects.yaml.
-- name: HashiCorp Nomad Bug Fixes (2)
+# Open source contributions, same schema as projects.yaml.
+- name: HashiCorp Nomad
   logo: nomad.png
-  summary: Two fixes to how the Nomad web UI jobs page and its `/v1/jobs/statuses` endpoint list jobs, both merged into hashicorp/nomad.
+  tagline: Jobs missing from the jobs list, and its pagination
+  summary: Two changes to how the hashicorp/nomad web UI jobs page and its `/v1/jobs/statuses` endpoint list jobs.
   groups:
     - title: "Jobs missing from the statuses endpoint and UI ([PR #28158](https://github.com/hashicorp/nomad/pull/28158))"
       items:
         - Jobs written in the same Raft transaction (such as mass rescheduling after a node failure) share a `ModifyIndex`, and silently vanished from the endpoint and the UI while still appearing via `/v1/jobs` and the CLI
         - "Root cause: the jobs-table `modify_index` memdb index was declared unique, but `ModifyIndex` is not unique across jobs, so colliding jobs were dropped from any query iterating that index"
-        - Submitted a written root-cause analysis, a live-cluster reproduction, and a self-contained Docker A/B harness; the fix marks the index non-unique, adds a regression test, and was backported to release branches
-        - Found and reported the pagination bug the fix exposed, which led to the follow-up below
+        - Submitted a written root-cause analysis, a live-cluster reproduction, and a self-contained Docker A/B harness; the change marks the index non-unique, adds a regression test, and was backported to release branches
+        - Found and reported the pagination bug the change exposed, which led to the follow-up below
     - title: "Jobs list pagination ([PR #28178](https://github.com/hashicorp/nomad/pull/28178))"
       items:
         - With the index non-unique, a cursor built from `ModifyIndex` alone duplicated jobs at page boundaries, stalled on large tied groups so older jobs became unreachable, and broke the "Last" page
         - Added a namespace/ID tiebreaker to the cursor matching the state store's walk order, with older bare-index tokens still accepted
         - Reworked the UI to page only with server-issued tokens, so a mixed-version cluster mid-upgrade still pages correctly in either direction
-        - Also fixed jobs outside the active filter appearing when paging backward, and paging after a refresh or from a shared link; covered by Go and UI acceptance tests
+        - Also stopped jobs outside the active filter appearing when paging backward, and made paging work after a refresh or from a shared link; covered by Go and UI acceptance tests
+  links:
+    - { label: "PR #28158", url: "https://github.com/hashicorp/nomad/pull/28158" }
+    - { label: "PR #28178", url: "https://github.com/hashicorp/nomad/pull/28178" }
 
-- name: Listed on awesome-selfhosted
+- name: Wander
+  logo: wander.svg
+  tagline: List pagination that repeated pages forever, now compared field by field
+  summary: Corrected list pagination in [Wander](https://openwander.org/wander/), the open source workload orchestrator.
+  items:
+    - "Found and reported the bug ([issue #55](https://github.com/open-wander/wander/issues/55)): paging through a list could repeat forever, because the paginator compared `next_token` cursors as whole strings while the state store orders them field by field (`team` before `team-a`, create index 9 before 10)"
+    - "The change ([PR #56](https://github.com/open-wander/wander/pull/56)) gives the structs tokenizer an optional comparer that compares each cursor field in index order, with the create index compared as a number; the token format is unchanged and other tokenizers still compare as strings"
+    - "Ordering tests and a namespace pagination test fail before the change and pass with it"
+  links:
+    - { label: "PR #56", url: "https://github.com/open-wander/wander/pull/56" }
+    - { label: "Issue #55", url: "https://github.com/open-wander/wander/issues/55" }
+
+- name: awesome-selfhosted
   logo: awesome-selfhosted.svg
+  tagline: s3-orchestrator accepted into the curated directory of self-hostable software
   summary: Got [s3-orchestrator](https://github.com/afreidah/s3-orchestrator) accepted into [awesome-selfhosted](https://awesome-selfhosted.net/), the curated directory of free self-hostable software. It's listed under File Transfer - Object Storage & File Servers.
   items:
-    - Wrote the entry in the project's YAML schema (description, license, platforms, tag) and submitted it to awesome-selfhosted-data; the maintainers reviewed and merged it
+    - Wrote the entry in the project's YAML schema (description, license, platforms, tag) and submitted it to awesome-selfhosted-data
   links:
-    - { label: View PR, url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/pull/3121" }
-    - { label: View Listing, url: "https://awesome-selfhosted.net/index.html#s3-orchestrator" }
-    - { label: awesome-selfhosted, url: "https://github.com/awesome-selfhosted/awesome-selfhosted" }
+    - { label: "PR #3121", url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/pull/3121" }
+    - { label: Listing, url: "https://awesome-selfhosted.net/index.html#s3-orchestrator" }
 
-- name: Go Protobuf Library Contribution
+- name: Go Protobuf Library
   logo: go-logo.png
-  logo_scale: 0.68
-  summary: Fixed a typo in the Go protobuf library, discovered through a custom CI/CD pipeline I designed for a backend service. Registered as a Go contributor and pushed the fix through Gerrit per the contribution rules; merged in version 1.25.
+  tagline: Typo correction, released in v1.25
+  summary: Corrected a typo in the Go protobuf library, discovered through a custom CI/CD pipeline I designed for a backend service. Registered as a Go contributor and pushed the change through Gerrit per the contribution rules; released in version 1.25.
   links:
-    - { label: View Change, url: "https://go-review.googlesource.com/c/protobuf/+/697595" }
+    - { label: "Change 697595", url: "https://go-review.googlesource.com/c/protobuf/+/697595" }
