@@ -8,4 +8,4 @@ I have extensive experience with infrastructure as code and configuration manage
 
 Outside of work I run Munchbox, a homelab cluster on Nomad, Consul, and Vault spanning bare-metal nodes, Proxmox VMs, and Oracle Cloud free-tier instances linked over WireGuard, all provisioned as code. Most of the projects below started as something that cluster needed, and this site is served from it.
 
-Before infrastructure I studied classical guitar at the Peabody Conservatory, and I've taught music and guitar for fifteen years, including as faculty at Northern Virginia Community College.
+I graduated with a Bachelor of Music in classical guitar performance from the Peabody Conservatory of Music at Johns Hopkins University. I've taught music and guitar for fifteen years, including as faculty at Northern Virginia Community College.

@@ -1,0 +1,20 @@
+{{- /* Projects and open source contributions on /resume, as plain lists rather
+       than the home page's collapsible rows, so the page prints and reads as a
+       CV. One line per entry: name, tagline, links. */ -}}
+<section id="projects" aria-labelledby="proj-h">
+  <h2 id="proj-h">Personal Projects</h2>
+  <ul class="cv-list">
+    {{- range site.Data.projects }}
+    {{ partial "cv-line.html" . }}
+    {{- end }}
+  </ul>
+</section>
+
+<section id="opensource" aria-labelledby="os-h">
+  <h2 id="os-h">Open Source Contributions</h2>
+  <ul class="cv-list">
+    {{- range site.Data.contributions }}
+    {{ partial "cv-line.html" . }}
+    {{- end }}
+  </ul>
+</section>

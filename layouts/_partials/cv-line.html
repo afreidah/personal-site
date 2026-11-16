@@ -1,0 +1,5 @@
+{{- /* One projects.yaml or contributions.yaml entry as a resume list item. A
+       link marked `resume: false` shows on the home page only. */ -}}
+<li><span class="cv-name">{{ .name }}</span>{{ with .tagline }} &ndash; {{ . }}{{ end }}
+  {{- with .links }}<span class="cv-links">{{ range . }}{{ if ne .resume false }}<a href="{{ .url }}" target="_blank" rel="noopener noreferrer">{{ .label }}</a>{{ end }}{{ end }}</span>{{ end -}}
+</li>
