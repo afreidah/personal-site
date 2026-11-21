@@ -1,0 +1,5 @@
+{{- /* A contributions.yaml entry with `count` set to its number of groups, or 1
+       for an entry without groups. */ -}}
+{{- $n := 1 }}
+{{- with .groups }}{{ $n = len . }}{{ end }}
+{{- return merge . (dict "count" $n) }}
