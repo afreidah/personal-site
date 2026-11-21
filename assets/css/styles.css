@@ -258,6 +258,7 @@ details.item.collapsible:hover {
    name-first rather than leading with the description. */
 .proj-name { color: #2dd4bf; font-weight: 400; font-size: 1.08rem; }
 .proj-desc { color: var(--muted); font-weight: 400; font-size: 0.92rem; }
+.entry-count { color: var(--nav); }
 /* Projects and contributions are rows, not boxes: a small icon, then the name
    with its tagline wrapping beneath it. The box appears only on hover and
    while a row is open. Repo links live in the expanded body. */

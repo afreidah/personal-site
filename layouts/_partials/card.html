@@ -7,7 +7,7 @@
     <h3>
       {{- with .logo }}<img class="card-logo" src="{{ printf "images/%s" . | relURL }}" alt=""{{ with $.logo_scale }} style="{{ printf "--logo-scale:%v" . | safeCSS }}"{{ end }}>{{ else }}<span class="card-logo-spacer"></span>{{ end -}}
       <span class="proj-text">
-        <span class="proj-name">{{ .name }}</span>
+        <span class="proj-name">{{ .name }}{{ with .count }} <span class="entry-count">({{ . }})</span>{{ end }}</span>
         {{- with .tagline }}<span class="proj-desc">{{ . }}</span>{{ end -}}
       </span>
     </h3>

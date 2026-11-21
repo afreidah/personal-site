@@ -14,7 +14,7 @@
   <h2 id="os-h">Open Source Contributions</h2>
   <ul class="cv-list">
     {{- range site.Data.contributions }}
-    {{ partial "cv-line.html" . }}
+    {{ partial "cv-line.html" (partial "contribution-count.html" .) }}
     {{- end }}
   </ul>
 </section>

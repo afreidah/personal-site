@@ -9,6 +9,6 @@
 <section id="opensource" class="proj-section" aria-labelledby="os-h">
   <h2 id="os-h">Open Source Contributions</h2>
   {{- range site.Data.contributions }}
-  {{ partial "card.html" . }}
+  {{ partial "card.html" (partial "contribution-count.html" .) }}
   {{- end }}
 </section>
